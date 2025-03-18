@@ -45,7 +45,7 @@ namespace TakeHome.ClientTester
                     Title = "New Document",
                     PublishDate = DateTime.Now.Ticks,
                     ExpiryDate = DateTime.Now.AddDays(30).Ticks,
-                    FileData = Document.GenerateRandomFileData()
+                    Content = Document.GenerateRandomFileData()
                 };
                 await cmsClient.CreateDocumentAsync(newDocument);
                 var newlyCreatedDocument = await cmsClient.GetDocumentAsync(newDocumentId);

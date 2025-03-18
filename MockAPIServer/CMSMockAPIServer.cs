@@ -119,7 +119,7 @@ namespace TakeHome.MockAPIServer
                             return new ResponseMessage { StatusCode = 404 };
                         }
 
-                        document.FileData = Document.GenerateRandomFileData();
+                        document.Content = Document.GenerateRandomFileData();
 
                         return new ResponseMessage
                         {
