@@ -72,6 +72,12 @@ namespace TakeHome.Client
 
         public async Task CreateDocumentAsync(Document document)
         {
+            var documents = await GetDocumentsMetadataAsync();
+            if (documents.Any(doc => doc.Id == document.Id))
+            {
+                throw new Exception("Document already exists.");
+            }
+
             var request = new HttpRequestMessage
             {
                 RequestUri = new Uri("document", UriKind.Relative),
@@ -84,6 +90,29 @@ namespace TakeHome.Client
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception($"Failed to create document. Status code: {response.StatusCode}");
+            }
+        }
+
+        public async Task UpdateDocumentAsync(Document document)
+        {
+            var documents = await GetDocumentsMetadataAsync();
+            if (!documents.Any(doc => doc.Id == document.Id))
+            {
+                throw new Exception("Document does not exist.");
+            }
+
+            var request = new HttpRequestMessage
+            {
+                RequestUri = new Uri("document", UriKind.Relative),
+                Method = HttpMethod.Post,
+                Content = new StringContent(JsonConvert.SerializeObject(document), Encoding.UTF8, MediaTypeNames.Application.Json)
+            };
+
+            var response = await SendAuthenticatedRequestAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to update document. Status code: {response.StatusCode}");
             }
         }
 
