@@ -119,6 +119,8 @@ namespace TakeHome.MockAPIServer
                             return new ResponseMessage { StatusCode = 404 };
                         }
 
+                        document.FileData = GenerateRandomFileData();
+
                         return new ResponseMessage
                         {
                             StatusCode = 200,
@@ -159,6 +161,16 @@ namespace TakeHome.MockAPIServer
                         return new ResponseMessage { StatusCode = 201 };
                     }));
         }
+
+        private static byte[] GenerateRandomFileData()
+        {
+            var random = new Random();
+            int size = random.Next(500_000, 1_500_000); // Random size between 500KB and 1.5MB
+            var fileData = new byte[size];
+            random.NextBytes(fileData);
+            return fileData;
+        }
+
 
         private static string BearerToken = "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d"; // Setting up default value to test endpoints without having to authenticate
         private static long ExpiryDate = DateTimeOffset.UtcNow.AddMinutes(15).ToUnixTimeSeconds();
