@@ -70,6 +70,23 @@ namespace TakeHome.Client
             return await response.Content.ReadFromJsonAsync<Document>();
         }
 
+        public async Task CreateDocumentAsync(Document document)
+        {
+            var request = new HttpRequestMessage
+            {
+                RequestUri = new Uri("document", UriKind.Relative),
+                Method = HttpMethod.Post,
+                Content = new StringContent(JsonConvert.SerializeObject(document), Encoding.UTF8, MediaTypeNames.Application.Json)
+            };
+
+            var response = await SendAuthenticatedRequestAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to create document. Status code: {response.StatusCode}");
+            }
+        }
+
 
         private async Task<HttpResponseMessage> SendAuthenticatedRequestAsync(HttpRequestMessage request)
         {

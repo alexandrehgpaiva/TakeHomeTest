@@ -1,4 +1,5 @@
-﻿using TakeHome.Client;
+﻿using System.Text;
+using TakeHome.Client;
 using TakeHome.Models;
 
 namespace TakeHome.ClientTester
@@ -32,6 +33,27 @@ namespace TakeHome.ClientTester
                 foreach (var prop in document.GetType().GetProperties())
                 {
                     PrintDocumentMetadata(document);
+                }
+
+                // Create a document
+                var newDocumentId = Guid.NewGuid().ToString();
+                var newDocument = new Document
+                {
+                    Id = newDocumentId,
+                    Title = "New Document",
+                    PublishDate = DateTime.Now.Ticks,
+                    ExpiryDate = DateTime.Now.AddDays(30).Ticks,
+                    FileData = Document.GenerateRandomFileData()
+                };
+                await cmsClient.CreateDocumentAsync(newDocument);
+                var newDocuments = await cmsClient.GetDocumentsMetadataAsync(new List<string> { newDocumentId });
+                if (newDocuments.FirstOrDefault()?.Id == newDocumentId)
+                {
+                    Console.WriteLine("Document created successfully.");
+                }
+                else
+                {
+                    throw new Exception("Document not created.");
                 }
             }
             catch (Exception ex)
