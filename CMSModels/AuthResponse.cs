@@ -1,4 +1,4 @@
-﻿namespace TakeHomeLibrary
+﻿namespace TakeHome.Models
 {
     public class AuthResponse
     {

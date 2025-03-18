@@ -1,16 +1,14 @@
 ﻿using Newtonsoft.Json;
-using System.Reflection.Metadata;
-using System.Text.Json.Nodes;
+using TakeHome.Models;
 using WireMock;
-using WireMock.Matchers;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 using WireMock.Util;
 
-namespace MockAPIServer
+namespace TakeHome.MockAPIServer
 {
-    internal class Program
+    public class CMSMockAPIServer
     {
         private static void Main(string[] args)
         {
@@ -162,10 +160,14 @@ namespace MockAPIServer
                     }));
         }
 
-        const string BearerToken = "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d";
+        private static string BearerToken = "a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d"; // Setting up default value to test endpoints without having to authenticate
+        private static long ExpiryDate = DateTimeOffset.UtcNow.AddMinutes(15).ToUnixTimeSeconds();
 
         private static object generateNewToken()
         {
+            BearerToken = new Guid().ToString();
+            ExpiryDate = DateTimeOffset.UtcNow.AddMinutes(15).ToUnixTimeSeconds();
+
             return new
             {
                 bearerToken = BearerToken,
@@ -181,8 +183,15 @@ namespace MockAPIServer
             }
 
             string? token = authorizationValues.FirstOrDefault();
-            return !string.IsNullOrEmpty(token) && token == expectedToken;
+            return !string.IsNullOrEmpty(token) && 
+                token == ($"Bearer {expectedToken}") && 
+                !IsTokenExpired();
+        }
+
+        private static bool IsTokenExpired()
+        {
+            var currentUnixTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            return currentUnixTime > ExpiryDate;
         }
     }
-
 }
