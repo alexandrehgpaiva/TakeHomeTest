@@ -19,20 +19,32 @@ namespace TakeHome.ClientTester
                 // Get documents metadata
                 List<Document> documents = await cmsClient.GetDocumentsMetadataAsync();
                 Console.WriteLine("Documents retrieved successfully:");
-
                 var properties = typeof(Document).GetProperties();
                 foreach (var doc in documents)
                 {
-                    foreach (var prop in doc.GetType().GetProperties())
-                    {
-                        Console.WriteLine($"{prop.Name}: {prop.GetValue(doc)}");
-                    }
+                    PrintDocumentMetadata(doc);
                     Console.WriteLine();
+                }
+
+                // Get a document
+                var document = await cmsClient.GetDocumentAsync("b3e1a6f4-8c2b-4d3a-9c3e-1f2b3a4d5e6f");
+                Console.WriteLine("Document retrieved successfully:");
+                foreach (var prop in document.GetType().GetProperties())
+                {
+                    PrintDocumentMetadata(document);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+        }
+
+        private static void PrintDocumentMetadata(Document doc)
+        {
+            foreach (var prop in doc.GetType().GetProperties())
+            {
+                Console.WriteLine($"{prop.Name}: {prop.GetValue(doc)}");
             }
         }
     }

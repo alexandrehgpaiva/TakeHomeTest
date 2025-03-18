@@ -23,6 +23,12 @@ namespace TakeHome.Client
             };
         }
 
+        public async Task<List<Document>> GetDocumentsMetadataAsync(List<string> documentIds)
+        {
+            var allDocuments = await GetDocumentsMetadataAsync();
+            return allDocuments.Where(doc => documentIds.Contains(doc.Id)).ToList();
+        }
+
         public async Task<List<Document>> GetDocumentsMetadataAsync()
         {
             var request = new HttpRequestMessage
@@ -31,12 +37,41 @@ namespace TakeHome.Client
                 Method = HttpMethod.Get
             };
 
-            var response = await SendRequestAsync<List<Document>>(request);
+            var response = await SendAuthenticatedRequestAsync(request);
 
-            return response;
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to retrieve documents. Status code: {response.StatusCode}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<List<Document>>();
         }
 
-        private async Task<T> SendRequestAsync<T>(HttpRequestMessage request)
+        public async Task<Document> GetDocumentAsync(string documentId)
+        {
+            var request = new HttpRequestMessage
+            {
+                RequestUri = new Uri($"document/{documentId}", UriKind.Relative),
+                Method = HttpMethod.Get
+            };
+
+            var response = await SendAuthenticatedRequestAsync(request);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                throw new Exception("Document not found.");
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to retrieve document. Status code: {response.StatusCode}");
+            }
+
+            return await response.Content.ReadFromJsonAsync<Document>();
+        }
+
+
+        private async Task<HttpResponseMessage> SendAuthenticatedRequestAsync(HttpRequestMessage request)
         {
             // Sending request with the current token
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentToken);
@@ -48,7 +83,7 @@ namespace TakeHome.Client
                 try
                 {
                     await RefreshAsync();
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Authorization", CurrentToken);
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", CurrentToken);
                     response = await _client.SendAsync(request);
                 }
                 catch
@@ -57,8 +92,9 @@ namespace TakeHome.Client
                 }
             }
 
-            return await response.Content.ReadFromJsonAsync<T>();
+            return response;
         }
+
 
         public async Task AuthenticateAsync(string tenantId, string username, string password)
         {
